@@ -5,6 +5,7 @@
 #include "modules.h"
 #include "info.h"
 #include "memory.h"
+#include "threads.h"
 
 void init_console(void)
 {
@@ -43,6 +44,7 @@ void test(void)
     std::list<MODULEENTRY32> lModules;
     DWORD   dwPid = 0;
     std::list<MEMORY_BASIC_INFORMATION> lMemBI;
+    std::list<THREADENTRY32> lThreads;
 
     lProcess = GetProcessList();
 
@@ -56,6 +58,13 @@ void test(void)
 
     lMemBI = GetMemoryInformation(dwPid);
     PrintMemoryInfo(lMemBI);
+
+    lThreads = GetThreadsList(dwPid);
+    PrintThreadsInfo(lThreads);
+
+    SuspendAllThread(dwPid);
+    Sleep(10000);
+    ResumeAllThread(dwPid);
 }
 
 int main(void)

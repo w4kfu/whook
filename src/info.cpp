@@ -37,3 +37,13 @@ void PrintMemoryInfo(std::list<MEMORY_BASIC_INFORMATION> lMemBI)
         printf("BaseAddress : %08X\tRegionSize : %08X\tProtect : %08X\n", (*it).BaseAddress, (*it).RegionSize, (*it).Protect);
     }
 }
+
+void PrintThreadsInfo(std::list<THREADENTRY32> lThreads)
+{
+    std::list<THREADENTRY32>::const_iterator it;
+
+    for (it = lThreads.begin(); it != lThreads.end(); ++it)
+    {
+        printf("th32ThreadID : %08X\ttpBasePri : %08X\ttpDeltaPri : %08X\n", (*it).th32ThreadID, (*it).tpBasePri, (*it).tpDeltaPri);
+    }
+}

@@ -12,4 +12,6 @@ void PrintModulesList(std::list<MODULEENTRY32> lModules);
 
 void PrintMemoryInfo(std::list<MEMORY_BASIC_INFORMATION> lMemBI);
 
+void PrintThreadsInfo(std::list<THREADENTRY32> lThreads);
+
 #endif // __INFO_H__
