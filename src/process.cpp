@@ -1,0 +1,92 @@
+#include "process.h"
+
+std::list<PROCESSENTRY32> GetProcessList(void)
+{
+    HANDLE hProcessSnap;
+    std::list<PROCESSENTRY32> lProcess;
+    PROCESSENTRY32 pe32;
+
+    hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hProcessSnap == INVALID_HANDLE_VALUE)
+    {
+        fprintf(stderr, "[-] CreateToolhelp32Snapshot() failed : %X\n", GetLastError());
+        return lProcess;
+    }
+    pe32.dwSize = sizeof (PROCESSENTRY32);
+    if (!Process32First(hProcessSnap, &pe32))
+    {
+        fprintf(stderr, "[-] Process32First() failed : %X\n", GetLastError());
+        CloseHandle(hProcessSnap);
+        return lProcess;
+    }
+    do
+    {
+        lProcess.push_back(pe32);
+    } while(Process32Next(hProcessSnap, &pe32));
+
+    CloseHandle(hProcessSnap);
+    return lProcess;
+}
+
+HANDLE GetHandleProcess(DWORD dwPid)
+{
+	HANDLE	HProcess;
+
+	HProcess = OpenProcess(PROCESS_ALL_ACCESS, 0, dwPid);
+	if (HProcess == NULL)
+    {
+        fprintf(stderr, "[-] OpenProcess() failed : %X\n", GetLastError());
+        return NULL;
+    }
+    return HProcess;
+}
+
+PROCESSENTRY32 GetPE32(DWORD dwPid)
+{
+    HANDLE hProcessSnap;
+    PROCESSENTRY32 pe32;
+
+    hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hProcessSnap == INVALID_HANDLE_VALUE)
+    {
+        fprintf(stderr, "[-] CreateToolhelp32Snapshot() failed : %X\n", GetLastError());
+        goto error_getpe32;
+    }
+    pe32.dwSize = sizeof (PROCESSENTRY32);
+    if (!Process32First(hProcessSnap, &pe32))
+    {
+        fprintf(stderr, "[-] Process32First() failed : %X\n", GetLastError());
+        CloseHandle(hProcessSnap);
+        goto error_getpe32;
+    }
+    do
+    {
+        if (pe32.th32ProcessID == dwPid)
+            goto end_getpe32;
+    } while(Process32Next(hProcessSnap, &pe32));
+
+error_getpe32:
+    memset(&pe32, 0, sizeof (PROCESSENTRY32));
+end_getpe32:
+    CloseHandle(hProcessSnap);
+    return pe32;
+}
+
+
+DWORD GetPidProcess(char *szModuleName)
+{
+    DWORD dwProcesses[1024]; // enough ?
+    DWORD dwCBNeeded;
+
+	if (!EnumProcesses(dwProcesses, sizeof(dwProcesses), &dwCBNeeded))
+		return 0;
+    for (DWORD i = 0; i < (dwCBNeeded / sizeof (DWORD)); i++)
+    {
+        if(dwProcesses[i] != 0)
+		{
+            if (IsModuleExist(dwProcesses[i], szModuleName))
+                return dwProcesses[i];
+		}
+    }
+    return 0;
+}
