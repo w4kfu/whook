@@ -31,17 +31,10 @@ typedef struct _PROCESS_BASIC_INFORMATION {
 } PROCESS_BASIC_INFORMATION;
 #endif;
 
-NTSTATUS (__stdcall *ZwQueryInformationProcess)(
-  HANDLE  ProcessHandle,
-  PROCESSINFOCLASS  ProcessInformationClass,
-  PVOID  ProcessInformation,
-  ULONG  ProcessInformationLength,
-  PULONG  ReturnLength  OPTIONAL
-  );
-
-
 PROCESS_BASIC_INFORMATION GetRemotePEB(DWORD dwPid);
 DWORD GetRemoteBaseAddress(DWORD dwPid);
+IMAGE_DOS_HEADER GetDosHeader(DWORD dwPid);
+IMAGE_NT_HEADERS GetNTHeader(DWORD dwPid);
 
 
 #endif // __PESTUFF_H__

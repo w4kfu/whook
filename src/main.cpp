@@ -6,6 +6,7 @@
 #include "info.h"
 #include "memory.h"
 #include "threads.h"
+#include "pestuff.h"
 
 void init_console(void)
 {
@@ -46,6 +47,9 @@ void test(void)
     std::list<MEMORY_BASIC_INFORMATION> lMemBI;
     std::list<THREADENTRY32> lThreads;
     std::list<LPCVOID> lAddress;
+    DWORD dwBaseAddress = 0;
+    IMAGE_DOS_HEADER DosHeader;
+    IMAGE_NT_HEADERS NTHeader;
 
     lProcess = GetProcessList();
 
@@ -69,6 +73,15 @@ void test(void)
 
     lAddress = ScanPattern("\x42\x42\x42", 3, dwPid);
     PrintPatternMatch(lAddress);
+
+    dwBaseAddress = GetRemoteBaseAddress(dwPid);
+    printf("BaseAddress = %08X\n", dwBaseAddress);
+
+    DosHeader = GetDosHeader(dwPid);
+    PrintDosHeader(&DosHeader);
+
+    NTHeader = GetNTHeader(dwPid);
+    PrintNTHeader(&NTHeader);
 }
 
 int main(void)

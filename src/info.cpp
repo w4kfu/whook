@@ -57,3 +57,17 @@ void PrintPatternMatch(std::list<LPCVOID> lAddress)
         printf("Address : %08X\n", *it);
     }
 }
+
+void PrintDosHeader(PIMAGE_DOS_HEADER pDosHeader)
+{
+    printf("e_magic : %04X\n", pDosHeader->e_magic);
+    // ...
+    printf("e_lfanew : %04X\n", pDosHeader->e_lfanew);
+}
+
+void PrintNTHeader(PIMAGE_NT_HEADERS pNTHeader)
+{
+    printf("Signature : %04X\n", pNTHeader->Signature);
+    printf("NumberOfSections : %04X\n", pNTHeader->FileHeader.NumberOfSections);
+
+}
