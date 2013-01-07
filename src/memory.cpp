@@ -45,5 +45,6 @@ std::list<MEMORY_BASIC_INFORMATION> GetMemoryInformation(DWORD dwPID)
         }
         PBAddress = (PBYTE)MBInfo.BaseAddress + MBInfo.RegionSize;
     }
+    CloseHandle(HProcess);
     return lMemBI;
 }

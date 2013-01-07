@@ -60,6 +60,7 @@ void test(void)
 
 int main(void)
 {
+    // Test
     test();
     system("pause");
     return 0;
