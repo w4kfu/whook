@@ -34,7 +34,6 @@ HANDLE GetHandleThread(DWORD dwTid)
 {
 	HANDLE	HThread;
 
-
 	HThread = OpenThread(THREAD_ALL_ACCESS, 0, dwTid);
 	if (HThread == NULL)
     {

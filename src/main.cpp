@@ -45,6 +45,7 @@ void test(void)
     DWORD   dwPid = 0;
     std::list<MEMORY_BASIC_INFORMATION> lMemBI;
     std::list<THREADENTRY32> lThreads;
+    std::list<LPCVOID> lAddress;
 
     lProcess = GetProcessList();
 
@@ -63,8 +64,11 @@ void test(void)
     PrintThreadsInfo(lThreads);
 
     SuspendAllThread(dwPid);
-    Sleep(10000);
+    Sleep(1000);
     ResumeAllThread(dwPid);
+
+    lAddress = ScanPattern("\x42\x42\x42", 3, dwPid);
+    PrintPatternMatch(lAddress);
 }
 
 int main(void)

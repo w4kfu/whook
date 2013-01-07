@@ -14,4 +14,6 @@ void PrintMemoryInfo(std::list<MEMORY_BASIC_INFORMATION> lMemBI);
 
 void PrintThreadsInfo(std::list<THREADENTRY32> lThreads);
 
+void PrintPatternMatch(std::list<LPCVOID> lAddress);
+
 #endif // __INFO_H__

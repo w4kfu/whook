@@ -47,3 +47,13 @@ void PrintThreadsInfo(std::list<THREADENTRY32> lThreads)
         printf("th32ThreadID : %08X\ttpBasePri : %08X\ttpDeltaPri : %08X\n", (*it).th32ThreadID, (*it).tpBasePri, (*it).tpDeltaPri);
     }
 }
+
+void PrintPatternMatch(std::list<LPCVOID> lAddress)
+{
+    std::list<LPCVOID>::const_iterator it;
+
+    for (it = lAddress.begin(); it != lAddress.end(); ++it)
+    {
+        printf("Address : %08X\n", *it);
+    }
+}
