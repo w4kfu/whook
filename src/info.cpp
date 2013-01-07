@@ -27,3 +27,13 @@ void PrintModulesList(std::list<MODULEENTRY32> lModules)
         printf("\tmodBaseAddr : %08X\tmodBaseSize\n", (*it).modBaseAddr, (*it).modBaseSize);
     }
 }
+
+void PrintMemoryInfo(std::list<MEMORY_BASIC_INFORMATION> lMemBI)
+{
+    std::list<MEMORY_BASIC_INFORMATION>::const_iterator it;
+
+    for (it = lMemBI.begin(); it != lMemBI.end(); ++it)
+    {
+        printf("BaseAddress : %08X\tRegionSize : %08X\tProtect : %08X\n", (*it).BaseAddress, (*it).RegionSize, (*it).Protect);
+    }
+}

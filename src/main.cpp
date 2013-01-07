@@ -4,6 +4,7 @@
 #include "process.h"
 #include "modules.h"
 #include "info.h"
+#include "memory.h"
 
 void init_console(void)
 {
@@ -41,6 +42,7 @@ void test(void)
     std::list<PROCESSENTRY32>  lProcess;
     std::list<MODULEENTRY32> lModules;
     DWORD   dwPid = 0;
+    std::list<MEMORY_BASIC_INFORMATION> lMemBI;
 
     lProcess = GetProcessList();
 
@@ -51,6 +53,9 @@ void test(void)
 
     lModules = GetModuleList(dwPid);
     PrintModulesList(lModules);
+
+    lMemBI = GetMemoryInformation(dwPid);
+    PrintMemoryInfo(lMemBI);
 }
 
 int main(void)
