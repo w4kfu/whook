@@ -27,7 +27,7 @@ BOOL IsModuleExist(DWORD dwPid, char *szModuleName)
     Module32First(TH32S, &mod);
     do
     {
-        if (!strcmp(szModuleName, mod.szModule))
+        if (!_stricmp(szModuleName, mod.szModule))
             return TRUE;
     } while (Module32Next(TH32S, &mod));
     return FALSE;

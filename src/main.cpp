@@ -8,6 +8,8 @@
 #include "threads.h"
 #include "pestuff.h"
 
+#include "../test/war.h"
+
 void init_console(void)
 {
   int Mode;
@@ -87,7 +89,8 @@ void test(void)
 int main(void)
 {
     // Test
-    test();
+    //test();
+    launch_war();
     system("pause");
     return 0;
 }

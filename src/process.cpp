@@ -75,7 +75,7 @@ end_getpe32:
 
 DWORD GetPidProcess(char *szModuleName)
 {
-    DWORD dwProcesses[1024]; // enough ?
+    DWORD dwProcesses[2048]; // enough ?
     DWORD dwCBNeeded;
 
 	if (!EnumProcesses(dwProcesses, sizeof(dwProcesses), &dwCBNeeded))

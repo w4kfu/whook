@@ -12,6 +12,7 @@ BOOL ReadMemory(DWORD dwPid, LPCVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSiz
         CloseHandle(HProcess);
         return FALSE;
     }
+    CloseHandle(HProcess);
     return TRUE;
 }
 
@@ -24,6 +25,22 @@ BOOL ReadMemory(HANDLE hProcess, LPCVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T 
         fprintf(stderr, "[-] ReadProcessMemory(..., lpBaseAddress = %08X, ..., nSize = %08X, ... ) failed : %X\n", lpBaseAddress, nSize, GetLastError());
         return FALSE;
     }
+    return TRUE;
+}
+
+BOOL WriteMemory(DWORD dwPid, LPVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize)
+{
+    HANDLE HProcess;
+
+    HProcess = GetHandleProcess(dwPid);
+    if (HProcess == NULL)
+        return FALSE;
+    if (WriteMemory(HProcess, lpBaseAddress, lpBuffer, nSize) == FALSE)
+    {
+        CloseHandle(HProcess);
+        return FALSE;
+    }
+    CloseHandle(HProcess);
     return TRUE;
 }
 
@@ -54,7 +71,7 @@ std::list<MEMORY_BASIC_INFORMATION> GetMemoryInformation(DWORD dwPID)
         {
             break;
         }
-        if ((MBInfo.State & MEM_COMMIT) && (MBInfo.Protect & WRITABLE))
+        if ((MBInfo.State & MEM_COMMIT) /*&& (MBInfo.Protect & WRITABLE)*/)
         {
             lMemBI.push_back(MBInfo);
         }
