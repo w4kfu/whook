@@ -4,7 +4,9 @@
 #include <windows.h>
 #include <stdio.h>
 
-void hex_dump(void *data, int size);
+void hexdump(void *data, int size);
+BOOL Is64bitOS();
+BOOL IsWow64(HANDLE hProcess);
 
 #endif // __UTILS_H__
 

@@ -3,11 +3,13 @@
 void PrintProcessList(std::list<PROCESSENTRY32> lProcess)
 {
     std::list<PROCESSENTRY32>::const_iterator it;
-
-    for (it = lProcess.begin(); it != lProcess.end(); ++it)
-    {
-        printf("szExeFile : %s\n", (*it).szExeFile);
-        printf("\tth32ProcessID : %d (0x%X)\tcntThreads : %d\n", (*it).th32ProcessID, (*it).th32ProcessID, (*it).cntThreads);
+    CHAR Name[25];
+    
+    printf("Image Name                     PID  NBTHREAD\n");
+    printf("========================= ======== =========\n");
+    for (it = lProcess.begin(); it != lProcess.end(); ++it) {
+        strncpy_s(Name, sizeof (Name), (*it).szExeFile, sizeof (Name) - 1);
+        printf("%-25s %8d %9d\n", Name, (*it).th32ProcessID, (*it).cntThreads);
     }
 }
 

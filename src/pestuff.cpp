@@ -1,9 +1,8 @@
 #include "pestuff.h"
 
-PROCESS_BASIC_INFORMATION GetRemotePEB(DWORD dwPid)
+PROCESS_BASIC_INFORMATION32 GetRemotePEB32(HANDLE HProcess)
 {
-    PROCESS_BASIC_INFORMATION pbi;
-    HANDLE HProcess;
+    PROCESS_BASIC_INFORMATION32 pbi;
     NTSTATUS (__stdcall *ZwQueryInformationProcess)(
                 HANDLE  ProcessHandle,
                 PROCESSINFOCLASS  ProcessInformationClass,
@@ -12,40 +11,71 @@ PROCESS_BASIC_INFORMATION GetRemotePEB(DWORD dwPid)
                 PULONG  ReturnLength  OPTIONAL
         );
 
-
-    memset(&pbi, 0, sizeof(PROCESS_BASIC_INFORMATION));
+    memset(&pbi, 0, sizeof(PROCESS_BASIC_INFORMATION32));
     ZwQueryInformationProcess = (long (__stdcall *)(HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG))GetProcAddress(GetModuleHandleA("ntdll"), "ZwQueryInformationProcess");
-    if (!ZwQueryInformationProcess)
-    {
-        fprintf(stderr, "[-] GetProcAddress() failed : %X\n", GetLastError());
+    if (!ZwQueryInformationProcess) {
+        fprintf(stderr, "[-] GetRemotePEB - GetProcAddress() failed : %X\n", GetLastError());
         return pbi;
     }
-    if ((HProcess = GetHandleProcess(dwPid)) == NULL)
-        return pbi;
-    if (ZwQueryInformationProcess(HProcess, 0, &pbi, sizeof(PROCESS_BASIC_INFORMATION), NULL) != 0)
-    {
-        fprintf(stderr, "[-] ZwQueryInformation failed : %X\n", GetLastError());
+    if (ZwQueryInformationProcess(HProcess, 0, &pbi, sizeof(PROCESS_BASIC_INFORMATION32), NULL) != 0) {
+        fprintf(stderr, "[-] GetRemotePEB - ZwQueryInformation failed : %X\n", GetLastError());
         return pbi;
     }
     return pbi;
 }
 
-DWORD GetRemoteBaseAddress(DWORD dwPid)
+PROCESS_BASIC_INFORMATION64 GetRemotePEB64(HANDLE HProcess)
 {
-    PROCESS_BASIC_INFORMATION pbi;
-    DWORD dwImageBase;
+    PROCESS_BASIC_INFORMATION64 pbi;
+    NTSTATUS (__stdcall *ZwQueryInformationProcess)(
+                HANDLE  ProcessHandle,
+                PROCESSINFOCLASS  ProcessInformationClass,
+                PVOID  ProcessInformation,
+                ULONG  ProcessInformationLength,
+                PULONG  ReturnLength  OPTIONAL
+        );
 
-    pbi = GetRemotePEB(dwPid);
-    if (pbi.UniqueProcessId != dwPid)
+    memset(&pbi, 0, sizeof(PROCESS_BASIC_INFORMATION64));
+    ZwQueryInformationProcess = (long (__stdcall *)(HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG))GetProcAddress(GetModuleHandleA("ntdll"), "NtWow64QueryInformationProcess64");
+    if (!ZwQueryInformationProcess) {
+        fprintf(stderr, "[-] GetRemotePEB - GetProcAddress() failed : %lu\n", GetLastError());
+        return pbi;
+    }
+    if (ZwQueryInformationProcess(HProcess, 0, &pbi, sizeof(pbi), NULL) != 0) {
+        fprintf(stderr, "[-] GetRemotePEB - ZwQueryInformation failed : %lu\n", GetLastError());
+        return pbi;
+    }
+    return pbi;
+}
+
+ULONG64 GetRemoteBaseAddress(DWORD dwPid)
+{
+    PROCESS_BASIC_INFORMATION32 pbi32;
+    PROCESS_BASIC_INFORMATION64 pbi64;
+    ULONG64 dwImageBase = 0;
+    HANDLE HProcess = NULL;
+
+    if ((HProcess = GetHandleProcess(dwPid)) == NULL)
         return 0;
-    if (ReadMemory(dwPid, (BYTE*)pbi.PebBaseAddress + 8, &dwImageBase, 4) == FALSE)
-    {
-        return 0;
+    if ((Is64bitOS() == TRUE) && (IsWow64(HProcess) == FALSE)) {
+        pbi64 = GetRemotePEB64(HProcess);
+        printf("%I64X\n", pbi64.PebBaseAddress);
+        if (ReadMemory(HProcess, (PVOID64)(pbi64.PebBaseAddress + 0x10), &dwImageBase, 8) == FALSE) {
+            return 0;
+        }
+    }
+    else {
+        pbi32 = GetRemotePEB32(HProcess);
+        if (pbi32.uUniqueProcessId != dwPid)
+            return 0;
+        if (ReadMemory(HProcess, (LPCVOID)(pbi32.PebBaseAddress + 8), &dwImageBase, 4) == FALSE) {
+            return 0;
+        }    
     }
     return dwImageBase;
 }
 
-IMAGE_DOS_HEADER GetDosHeader(DWORD dwPid)
+/*IMAGE_DOS_HEADER GetDosHeader(DWORD dwPid)
 {
     IMAGE_DOS_HEADER DosHeader;
     DWORD dwImageBase;
@@ -57,9 +87,9 @@ IMAGE_DOS_HEADER GetDosHeader(DWORD dwPid)
         return DosHeader;
     }
     return DosHeader;
-}
+}*/
 
-IMAGE_NT_HEADERS GetNTHeader(DWORD dwPid)
+/*IMAGE_NT_HEADERS GetNTHeader(DWORD dwPid)
 {
     IMAGE_DOS_HEADER DosHeader;
     IMAGE_NT_HEADERS NTHeader;
@@ -73,4 +103,4 @@ IMAGE_NT_HEADERS GetNTHeader(DWORD dwPid)
         return NTHeader;
     }
     return NTHeader;
-}
+}*/

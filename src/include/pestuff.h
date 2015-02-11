@@ -6,10 +6,13 @@
 
 #include "process.h"
 #include "memory.h"
+#include "utils.h"
 
 #if !defined NTSTATUS
 typedef LONG NTSTATUS;
 #endif
+
+typedef LONG		KPRIORITY;
 
 #define STATUS_SUCCESS 0
 
@@ -21,18 +24,31 @@ typedef LONG PROCESSINFOCLASS;
 typedef struct _PEB *PPEB;
 #endif
 
-#if !defined PROCESS_BASIC_INFORMATION
-typedef struct _PROCESS_BASIC_INFORMATION {
-    PVOID Reserved1;
-    PPEB PebBaseAddress;
-    PVOID Reserved2[2];
-    ULONG_PTR UniqueProcessId;
-    PVOID Reserved3;
-} PROCESS_BASIC_INFORMATION;
-#endif;
+typedef struct _PROCESS_BASIC_INFORMATION32
+{
+	NTSTATUS	ExitStatus;
+	ULONG		PebBaseAddress;
+	ULONG		AffinityMask;
+	KPRIORITY	BasePriority;
+	ULONG		uUniqueProcessId;
+	ULONG		uInheritedFromUniqueProcessId;
+} PROCESS_BASIC_INFORMATION32, *PPROCESS_BASIC_INFORMATION32;
 
-PROCESS_BASIC_INFORMATION GetRemotePEB(DWORD dwPid);
-DWORD GetRemoteBaseAddress(DWORD dwPid);
+typedef struct _PROCESS_BASIC_INFORMATION64
+{
+	NTSTATUS	ExitStatus;
+	ULONG		Reserved0;
+	ULONG64		PebBaseAddress;
+	ULONG64		AffinityMask;
+	KPRIORITY	BasePriority;
+	ULONG		Reserved1;
+	ULONG64		uUniqueProcessId;
+	ULONG64		uInheritedFromUniqueProcessId;
+} PROCESS_BASIC_INFORMATION64, *PPROCESS_BASIC_INFORMATION64;
+
+PROCESS_BASIC_INFORMATION32 GetRemotePEB32(HANDLE HProcess);
+PROCESS_BASIC_INFORMATION64 GetRemotePEB64(HANDLE HProcess);
+ULONG64 GetRemoteBaseAddress(DWORD dwPid);
 IMAGE_DOS_HEADER GetDosHeader(DWORD dwPid);
 IMAGE_NT_HEADERS GetNTHeader(DWORD dwPid);
 
