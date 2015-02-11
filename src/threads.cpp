@@ -32,10 +32,10 @@ std::list<THREADENTRY32> GetThreadsList(DWORD dwPID)
 
 HANDLE GetHandleThread(DWORD dwTid)
 {
-	HANDLE	HThread;
+    HANDLE    HThread;
 
-	HThread = OpenThread(THREAD_ALL_ACCESS, 0, dwTid);
-	if (HThread == NULL)
+    HThread = OpenThread(THREAD_ALL_ACCESS, 0, dwTid);
+    if (HThread == NULL)
     {
         fprintf(stderr, "[-] OpenThread() failed : %X\n", GetLastError());
         return NULL;

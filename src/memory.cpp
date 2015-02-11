@@ -63,14 +63,14 @@ std::list<MEMORY_BASIC_INFORMATION> GetMemoryInformation(DWORD dwPID)
     HANDLE HProcess;
     PBYTE PBAddress = 0;
 
-    if (!(HProcess = GetHandleProcess(dwPID)))
+    if ((HProcess = GetHandleProcess(dwPID)) == NULL)
         return lMemBI;
-    while (1)
+    while (VirtualQueryEx (HProcess, PBAddress, &MBInfo, sizeof(MBInfo)) == 0)
     {
-        if (VirtualQueryEx (HProcess, PBAddress, &MBInfo, sizeof(MBInfo)) == 0)
-        {
-            break;
-        }
+        //if (VirtualQueryEx (HProcess, PBAddress, &MBInfo, sizeof(MBInfo)) == 0)
+        //{
+        //    break;
+        //}
         if ((MBInfo.State & MEM_COMMIT) /*&& (MBInfo.Protect & WRITABLE)*/)
         {
             lMemBI.push_back(MBInfo);

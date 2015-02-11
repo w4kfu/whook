@@ -31,8 +31,8 @@ void init_console(void)
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 {
-	DisableThreadLibraryCalls(GetModuleHandleA("whook.dll"));
-	return 1;
+    DisableThreadLibraryCalls(GetModuleHandleA("whook.dll"));
+    return 1;
 }
 
 __declspec(dllexport) BOOL run(void)
