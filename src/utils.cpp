@@ -61,3 +61,49 @@ BOOL IsWow64(HANDLE hProcess)
     }
     return bIsWow64 != FALSE;
 }
+
+BOOL EnablePrivilege(PCSTR PrivilegeName, BOOLEAN Acquire)
+{
+    HANDLE tokenHandle;
+    BOOL ret;
+    ULONG tokenPrivilegesSize = FIELD_OFFSET(TOKEN_PRIVILEGES, Privileges[1]);
+    PTOKEN_PRIVILEGES tokenPrivileges = (PTOKEN_PRIVILEGES)(calloc(1, tokenPrivilegesSize));
+
+    if (tokenPrivileges == NULL) {
+        fprintf(stderr, "[-] EnablePrivilege - calloc failed\n");
+        return FALSE;
+    }
+    tokenHandle = NULL;
+    tokenPrivileges->PrivilegeCount = 1;
+    ret = LookupPrivilegeValueA(NULL, PrivilegeName,
+                               &tokenPrivileges->Privileges[0].Luid);
+    if (ret == FALSE) {
+        fprintf(stderr, "[-] EnablePrivilege - LookupPrivilegeValueA failed %lu\n", GetLastError());
+        goto Exit;
+    }
+    tokenPrivileges->Privileges[0].Attributes = Acquire ? SE_PRIVILEGE_ENABLED
+                                                        : SE_PRIVILEGE_REMOVED;
+    ret = OpenProcessToken(GetCurrentProcess(),
+                           TOKEN_ADJUST_PRIVILEGES,
+                           &tokenHandle);
+    if (ret == FALSE) {
+        fprintf(stderr, "[-] EnablePrivilege - OpenProcessToken failed %lu\n", GetLastError());
+        goto Exit;
+    }
+    ret = AdjustTokenPrivileges(tokenHandle,
+                                FALSE,
+                                tokenPrivileges,
+                                tokenPrivilegesSize,
+                                NULL,
+                                NULL);
+    if (ret == FALSE) {
+        printf("Failed to adjust current process token privileges:  %lu\n", GetLastError());
+        goto Exit;
+    }
+Exit:
+    if (tokenHandle != NULL) {
+        CloseHandle(tokenHandle);
+    }
+    free(tokenPrivileges);
+    return ret;
+}
