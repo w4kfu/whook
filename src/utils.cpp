@@ -62,6 +62,26 @@ BOOL IsWow64(HANDLE hProcess)
     return bIsWow64 != FALSE;
 }
 
+BOOL IsWow64(DWORD dwPid)
+{
+    HANDLE HProcess = NULL;
+    BOOL bRet = FALSE;
+    
+    if ((HProcess = GetHandleProcess(dwPid)) == NULL)
+        return 0;
+    bRet = IsWow64(HProcess);
+    CloseHandle(HProcess);
+    return bRet;
+}
+
+BOOL Is64BitProcess(DWORD dwPid)
+{
+    if ((Is64bitOS() == TRUE) && (IsWow64(dwPid) == FALSE)) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
 BOOL EnablePrivilege(PCSTR PrivilegeName, BOOLEAN Acquire)
 {
     HANDLE tokenHandle;
@@ -78,7 +98,7 @@ BOOL EnablePrivilege(PCSTR PrivilegeName, BOOLEAN Acquire)
     ret = LookupPrivilegeValueA(NULL, PrivilegeName,
                                &tokenPrivileges->Privileges[0].Luid);
     if (ret == FALSE) {
-        fprintf(stderr, "[-] EnablePrivilege - LookupPrivilegeValueA failed %lu\n", GetLastError());
+        fprintf(stderr, "[-] EnablePrivilege - LookupPrivilegeValueA failed: %lu\n", GetLastError());
         goto Exit;
     }
     tokenPrivileges->Privileges[0].Attributes = Acquire ? SE_PRIVILEGE_ENABLED
@@ -87,7 +107,7 @@ BOOL EnablePrivilege(PCSTR PrivilegeName, BOOLEAN Acquire)
                            TOKEN_ADJUST_PRIVILEGES,
                            &tokenHandle);
     if (ret == FALSE) {
-        fprintf(stderr, "[-] EnablePrivilege - OpenProcessToken failed %lu\n", GetLastError());
+        fprintf(stderr, "[-] EnablePrivilege - OpenProcessToken failed: %lu\n", GetLastError());
         goto Exit;
     }
     ret = AdjustTokenPrivileges(tokenHandle,
@@ -97,7 +117,7 @@ BOOL EnablePrivilege(PCSTR PrivilegeName, BOOLEAN Acquire)
                                 NULL,
                                 NULL);
     if (ret == FALSE) {
-        printf("Failed to adjust current process token privileges:  %lu\n", GetLastError());
+        fprintf(stderr, "[-] EnablePrivilege - AdjustTokenPrivileges: %lu\n", GetLastError());
         goto Exit;
     }
 Exit:
@@ -106,4 +126,23 @@ Exit:
     }
     free(tokenPrivileges);
     return ret;
+}
+
+BOOL IsElevated(VOID) 
+{
+    BOOL fRet = FALSE;
+    HANDLE hToken = NULL;
+    TOKEN_ELEVATION Elevation;
+    DWORD cbSize;
+    
+    if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
+        cbSize = sizeof( TOKEN_ELEVATION );
+        if (GetTokenInformation(hToken, TokenElevation, &Elevation, sizeof (Elevation), &cbSize)) {
+            fRet = Elevation.TokenIsElevated;
+        }
+    }
+    if (hToken) {
+        CloseHandle(hToken);
+    }
+    return fRet;
 }

@@ -59,7 +59,6 @@ ULONG64 GetRemoteBaseAddress(DWORD dwPid)
         return 0;
     if ((Is64bitOS() == TRUE) && (IsWow64(HProcess) == FALSE)) {
         pbi64 = GetRemotePEB64(HProcess);
-        printf("%I64X\n", pbi64.PebBaseAddress);
         if (ReadMemory(HProcess, (PVOID64)(pbi64.PebBaseAddress + 0x10), &dwImageBase, 8) == FALSE) {
             return 0;
         }

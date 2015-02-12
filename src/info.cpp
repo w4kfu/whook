@@ -115,11 +115,21 @@ void PrintModulesList(std::list<MODULEENTRY32> lModules)
 {
     std::list<MODULEENTRY32>::const_iterator it;
 
-    for (it = lModules.begin(); it != lModules.end(); ++it)
-    {
-        printf("szModule : %s\n", (*it).szModule);
-        printf("\tszExePath : %s\n", (*it).szExePath);
-        printf("\tmodBaseAddr : %08X\tmodBaseSize\n", (*it).modBaseAddr, (*it).modBaseSize);
+    printf("BaseDllName                    ImageBase  ImageSize\n");
+    printf("============================== ========== =========\n");
+    for (it = lModules.begin(); it != lModules.end(); ++it) {
+        printf("%-30s 0x%08X 0x%08X\n", (*it).szModule, (*it).modBaseAddr, (*it).modBaseSize);
+    }
+}
+
+void PrintModulesList(std::list<MODULEENTRY64> lModules)
+{
+    std::list<MODULEENTRY64>::const_iterator it;
+
+    printf("BaseDllName                    ImageBase          ImageSize\n");
+    printf("============================== ================== =========\n");
+    for (it = lModules.begin(); it != lModules.end(); ++it) {
+        printf("%-30s 0x%016llX 0x%08X\n", (*it).BaseDllName, (*it).DllBase, (*it).SizeOfImage);
     }
 }
 

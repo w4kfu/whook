@@ -49,6 +49,16 @@ typedef struct _PROCESS_BASIC_INFORMATION64
 	ULONG64		uInheritedFromUniqueProcessId;
 } PROCESS_BASIC_INFORMATION64, *PPROCESS_BASIC_INFORMATION64;
 
+typedef struct _PEB_LDR_DATA64
+{
+	ULONG			Length;
+	BOOLEAN			Initialized;
+	ULONG64			SsHandle;
+	LIST_ENTRY64	InLoadOrderModuleList; // ref. to PLDR_DATA_TABLE_ENTRY->InLoadOrderModuleList
+	LIST_ENTRY64	InMemoryOrderModuleList; // ref. to PLDR_DATA_TABLE_ENTRY->InMemoryOrderModuleList
+	LIST_ENTRY64	InInitializationOrderModuleList; // ref. to PLDR_DATA_TABLE_ENTRY->InInitializationOrderModuleList
+} PEB_LDR_DATA64, *PPEB_LDR_DATA64;
+
 PROCESS_BASIC_INFORMATION32 GetRemotePEB32(HANDLE HProcess);
 PROCESS_BASIC_INFORMATION64 GetRemotePEB64(HANDLE HProcess);
 ULONG64 GetRemoteBaseAddress(DWORD dwPid);

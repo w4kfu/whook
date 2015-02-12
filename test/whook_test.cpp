@@ -10,6 +10,30 @@
 #include "utils.h"
 #include "pestuff.h"
 #include "network.h"
+#include "modules.h"
+
+VOID TestModules(VOID)
+{
+    std::list<MODULEENTRY32> lModules;
+    std::list<MODULEENTRY64> lModules64;
+    DWORD dwPid;
+    
+    dwPid = GetPidProcess("calc.exe");
+
+    if (Is64BitProcess(dwPid) == TRUE) {
+        lModules64 = GetModuleList64(dwPid);
+        PrintModulesList(lModules64);      
+    }
+    else {
+        lModules = GetModuleList(dwPid);
+        PrintModulesList(lModules);  
+    }
+    
+    dwPid = GetPidProcess("STFU.exe");
+    if (dwPid == DWORD(-1)) {
+        ExitProcess(42);
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -22,10 +46,15 @@ int main(int argc, char *argv[])
     (void)argc;
     (void)argv;
     
+    TestModules();
+    
     if (!EnablePrivilege(SE_DEBUG_NAME, TRUE)) {
         printf("[-] SeDebugPrivilege failed : %u\n", GetLastError());
         return -1;
-    }    
+    }
+    if (IsElevated() == FALSE) {
+        printf("[-] Not elevated privileges, some features will fail\n");
+    }
     
     printf("[+] Is64bitOS : %d\n", Is64bitOS());
     printf("[+] IsWow64(GetCurrentProcess()) : %d\n", IsWow64(GetCurrentProcess()));

@@ -46,7 +46,7 @@ BOOL ReadMemory(HANDLE hProcess, PVOID64 lpBaseAddress, LPVOID lpBuffer, SIZE_T 
         fprintf(stderr, "[-] ReadMemory - GetProcAddress() failed : %lu\n", GetLastError());
         return FALSE;
     }
-    if (NtWow64ReadVirtualMemory64(hProcess, lpBaseAddress, lpBuffer, 8, &lpNumberOfBytesRead)) {
+    if (NtWow64ReadVirtualMemory64(hProcess, lpBaseAddress, lpBuffer, nSize, &lpNumberOfBytesRead)) {
         fprintf(stderr, "[-] ReadMemory - NtWow64ReadVirtualMemory64(..., lpBaseAddress = %I64X, ..., nSize = %08X, ... ) failed : %lu\n", lpBaseAddress, nSize, GetLastError());
         return FALSE;
     }
