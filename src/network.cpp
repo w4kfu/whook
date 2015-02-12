@@ -131,3 +131,70 @@ std::list<MIB_UDP6ROW_OWNER_PID> GetUDPConnectionsv6(void)
     free(pmib);
     return lmib;
 }
+
+BOOL CloseTCPConnection(DWORD dwLocalAddr, DWORD dwLocalPort, DWORD dwRemoteAddr, DWORD dwRemotePort)
+{
+    DWORD dwRetVal;
+    MIB_TCPROW mibrow;
+    
+    mibrow.dwState = MIB_TCP_STATE_DELETE_TCB;
+    mibrow.dwLocalAddr = dwLocalAddr;
+    mibrow.dwLocalPort = dwLocalPort;
+    mibrow.dwRemoteAddr = dwRemoteAddr;
+    mibrow.dwRemotePort = dwRemotePort;
+    if ((dwRetVal = SetTcpEntry(&mibrow)) != 0) {
+        fprintf(stderr, "[-] CloseTPCConnection - SetTcpEntry failed: %lu\n", dwRetVal);
+        return FALSE;
+    }
+    return TRUE;
+}
+
+BOOL CloseTCPConnectionRemote(std::list<MIB_TCPROW_OWNER_PID> mib, u_short RemotePort)
+{
+    std::list<MIB_TCPROW_OWNER_PID>::const_iterator it;
+    
+    for (it = mib.begin(); it != mib.end(); ++it) {
+        if (htons((short)(*it).dwRemotePort) == RemotePort) {
+            return CloseTCPConnection((*it).dwLocalAddr, (*it).dwLocalPort, (*it).dwRemoteAddr, (*it).dwRemotePort);
+        }
+    }
+    return FALSE;
+}
+
+BOOL CloseTCPConnectionRemote(std::list<MIB_TCPROW_OWNER_PID> mib, char *RemoteAddr)
+{
+    std::list<MIB_TCPROW_OWNER_PID>::const_iterator it;
+    DWORD dwRemoteAddr = inet_addr(RemoteAddr);
+    
+    for (it = mib.begin(); it != mib.end(); ++it) {
+        if ((*it).dwRemoteAddr == dwRemoteAddr) {
+            return CloseTCPConnection((*it).dwLocalAddr, (*it).dwLocalPort, (*it).dwRemoteAddr, (*it).dwRemotePort);
+        }
+    }
+    return FALSE;
+}
+
+BOOL CloseTCPConnectionRemote(std::list<MIB_TCPROW_OWNER_PID> mib, char *RemoteAddr, u_short RemotePort)
+{
+    std::list<MIB_TCPROW_OWNER_PID>::const_iterator it;
+    DWORD dwRemoteAddr = inet_addr(RemoteAddr);
+    
+    for (it = mib.begin(); it != mib.end(); ++it) {
+        if ((*it).dwRemoteAddr == dwRemoteAddr && htons((short)(*it).dwRemotePort) == RemotePort) {
+            return CloseTCPConnection((*it).dwLocalAddr, (*it).dwLocalPort, (*it).dwRemoteAddr, (*it).dwRemotePort);
+        }
+    }
+    return FALSE;
+}
+
+BOOL CloseTCPConnectionLocal(std::list<MIB_TCPROW_OWNER_PID> mib, u_short LocalPort)
+{
+    std::list<MIB_TCPROW_OWNER_PID>::const_iterator it;
+        
+    for (it = mib.begin(); it != mib.end(); ++it) {
+        if (htons((short)(*it).dwLocalPort) == LocalPort) {
+            return CloseTCPConnection((*it).dwLocalAddr, (*it).dwLocalPort, (*it).dwRemoteAddr, (*it).dwRemotePort);
+        }
+    }
+    return FALSE;
+}

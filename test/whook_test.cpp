@@ -45,5 +45,8 @@ int main(int argc, char *argv[])
     PrintTCPConnectionsv6(lMibv6);
     lMuibv6 = GetUDPConnectionsv6();
     PrintUDPConnectionsv6(lMuibv6);
+    
+    CloseTCPConnectionRemote(lMib, "88.198.127.131", 13337);
+    
     return 0;
 }
