@@ -6,7 +6,8 @@ set(WHOOK_FILES_SRC
     pestuff.cpp
     process.cpp
     threads.cpp
-    utils.cpp)
+    utils.cpp
+    network.cpp)
 
 include_directories(${CMAKE_SOURCE_DIR}/src/include/)    
     

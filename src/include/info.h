@@ -5,8 +5,15 @@
 
 #include "process.h"
 #include "modules.h"
+#include "network.h"
 
 void PrintProcessList(std::list<PROCESSENTRY32> lProcess);
+void PrintTCPConnections(std::list<MIB_TCPROW_OWNER_PID> mib);
+void PrintTCPConnectionsv6(std::list<MIB_TCP6ROW_OWNER_PID> mib);
+void PrintUDPConnections(std::list<MIB_UDPROW_OWNER_PID> mib);
+void PrintUDPConnectionsv6(std::list<MIB_UDP6ROW_OWNER_PID> mib);
+
+
 void PrintPidProcess(char *szModuleName, DWORD dwPid);
 void PrintModulesList(std::list<MODULEENTRY32> lModules);
 void PrintMemoryInfo(std::list<MEMORY_BASIC_INFORMATION> lMemBI);

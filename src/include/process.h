@@ -1,6 +1,9 @@
 #ifndef __PROCESS_H__
 #define __PROCESS_H__
 
+#ifndef WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 #include <tlhelp32.h>
 #include <psapi.h>

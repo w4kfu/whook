@@ -34,6 +34,7 @@ foreach(lang C CXX)
     endif ("${CMAKE_${lang}_FLAGS}" MATCHES "/W[1-3]")
 endforeach(lang)
 msvc_link_to_static_crt()
+SET(LINK_LIBS ${LINK_LIBS} ws2_32.lib iphlpapi.lib)
 
 add_subdirectory(src/)
 add_subdirectory(test/)
