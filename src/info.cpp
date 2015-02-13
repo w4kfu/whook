@@ -133,6 +133,17 @@ void PrintModulesList(std::list<MODULEENTRY64> lModules)
     }
 }
 
+void PrintExportEntry(std::list<EXPORTENTRY> lExport)
+{
+    std::list<EXPORTENTRY>::const_iterator it;
+    
+    printf("Name                                               FunctionRVA Ordinal\n");
+    printf("================================================== =========== =========\n");
+    for (it = lExport.begin(); it != lExport.end(); ++it) {
+        printf("%-50s 0x%08X  0x%04X\n", (*it).FunctionName, (*it).FunctionRVA, (*it).Ordinal);
+    }
+}
+
 void PrintMemoryInfo(std::list<MEMORY_BASIC_INFORMATION> lMemBI)
 {
     std::list<MEMORY_BASIC_INFORMATION>::const_iterator it;

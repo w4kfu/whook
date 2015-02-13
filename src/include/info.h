@@ -17,6 +17,7 @@ void PrintUDPConnectionsv6(std::list<MIB_UDP6ROW_OWNER_PID> mib);
 void PrintPidProcess(char *szModuleName, DWORD dwPid);
 void PrintModulesList(std::list<MODULEENTRY32> lModules);
 void PrintModulesList(std::list<MODULEENTRY64> lModules);
+void PrintExportEntry(std::list<EXPORTENTRY> lExport);
 
 
 void PrintMemoryInfo(std::list<MEMORY_BASIC_INFORMATION> lMemBI);

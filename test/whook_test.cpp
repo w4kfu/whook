@@ -11,6 +11,23 @@
 #include "pestuff.h"
 #include "network.h"
 #include "modules.h"
+#include "file.h"
+
+#define processname "calc.exe"
+//#define processname "whook_test.exe"
+
+//#define FILENAME "C:\\Work\\Code\\whook\\cmake\\bin\\Debug\\calc.exe"
+#define FILENAME "C:\\Work\\Code\\whook\\cmake\\bin\\Debug\\dbghelp_32.dll"
+
+VOID TestFile(VOID)
+{
+    WHOOK_FILE wFile;
+    std::list<EXPORTENTRY> lExport;
+
+    wFile = WhookFileOpen(FILENAME);
+    lExport = GetExport((HMODULE)wFile.buf);
+    PrintExportEntry(lExport);
+}
 
 VOID TestModules(VOID)
 {
@@ -18,7 +35,7 @@ VOID TestModules(VOID)
     std::list<MODULEENTRY64> lModules64;
     DWORD dwPid;
     
-    dwPid = GetPidProcess("calc.exe");
+    dwPid = GetPidProcess(processname);
 
     if (Is64BitProcess(dwPid) == TRUE) {
         lModules64 = GetModuleList64(dwPid);
@@ -45,6 +62,8 @@ int main(int argc, char *argv[])
     DWORD dwPid;
     (void)argc;
     (void)argv;
+    
+    TestFile();
     
     TestModules();
     
