@@ -20,7 +20,10 @@ void PrintModulesList(std::list<MODULEENTRY64> lModules);
 void PrintExportEntry(std::list<EXPORTENTRY> lExport);
 
 
-void PrintMemoryInfo(std::list<MEMORY_BASIC_INFORMATION> lMemBI);
+void PrintMemoryInfo(std::list<MEMORY_BASIC_INFORMATION32> lMemBI);
+void PrintMemoryInfo(std::list<MEMORY_BASIC_INFORMATION64> lMemBI);
+
+//void PrintMemoryInfo(std::list<MEMORY_BASIC_INFORMATION> lMemBI);
 void PrintThreadsInfo(std::list<THREADENTRY32> lThreads);
 void PrintPatternMatch(std::list<LPCVOID> lAddress);
 void PrintDosHeader(PIMAGE_DOS_HEADER pDosHeader);

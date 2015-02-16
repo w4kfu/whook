@@ -20,6 +20,7 @@ typedef struct _WHOOK_FILE
 
 WHOOK_FILE WhookFileOpen(const char *filename);
 
+BOOL Write2File(LPCSTR FileName, PBYTE pBuffer, SIZE_T Size);
 
 #endif // __FILE_H__
 

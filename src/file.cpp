@@ -28,3 +28,22 @@ WHOOK_FILE WhookFileOpen(const char *filename)
     }
     return wFile;
 }
+
+BOOL Write2File(LPCSTR FileName, PBYTE pBuffer, SIZE_T Size)
+{
+    HANDLE hFile = INVALID_HANDLE_VALUE;
+    DWORD dwWritten = 0;
+
+    if ((hFile = CreateFileA(FileName, (GENERIC_READ | GENERIC_WRITE),
+                             FILE_SHARE_READ | FILE_SHARE_READ,
+                             NULL, CREATE_ALWAYS, 0, NULL)) == INVALID_HANDLE_VALUE) {
+        return FALSE;
+	}
+    WriteFile(hFile, pBuffer, Size, &dwWritten, NULL);
+    if (dwWritten != Size) {
+        CloseHandle(hFile);
+        return FALSE;
+    }
+	CloseHandle(hFile);
+    return TRUE;
+}

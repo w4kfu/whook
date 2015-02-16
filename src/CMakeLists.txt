@@ -8,7 +8,8 @@ set(WHOOK_FILES_SRC
     threads.cpp
     utils.cpp
     network.cpp
-    file.cpp)
+    file.cpp
+    dump.cpp)
 
 include_directories(${CMAKE_SOURCE_DIR}/src/include/)    
     

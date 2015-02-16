@@ -14,7 +14,7 @@ std::list<MODULEENTRY64> GetModuleList64(DWORD dwPid)
 
     if ((HProcess = GetHandleProcess(dwPid)) == NULL)
         return lModule;
-    pbi64 = GetRemotePEB64(HProcess);
+    pbi64 = GetRemotePBI64(HProcess);
     // +0x018 Ldr              : Ptr64 _PEB_LDR_DATA
     if (ReadMemory(HProcess, (PVOID64)(pbi64.PebBaseAddress + 0x18), &Ldr64, 8) == FALSE) {
         return lModule;
@@ -78,6 +78,32 @@ std::list<MODULEENTRY32> GetModuleList(DWORD dwPid)
         lModule.push_back(mod);
     } while (Module32Next(TH32S, &mod));
     return lModule;
+}
+
+ULONG64 GetModuleSize(DWORD dwPid, ULONG64 BaseAddress)
+{
+    std::list<MODULEENTRY32> lModules;
+    std::list<MODULEENTRY64> lModules64;
+    std::list<MODULEENTRY64>::const_iterator it64;
+    std::list<MODULEENTRY32>::const_iterator it32;
+
+    if (Is64BitProcess(dwPid) == TRUE) {
+        lModules64 = GetModuleList64(dwPid);
+        for (it64 = lModules64.begin(); it64 != lModules64.end(); ++it64) {
+            if ((*it64).DllBase == BaseAddress) {
+                return (*it64).SizeOfImage;
+            }
+        }
+    }
+    else {
+        lModules = GetModuleList(dwPid);
+        for (it32 = lModules.begin(); it32 != lModules.end(); ++it32) {
+            if ((DWORD)(*it32).modBaseAddr == (DWORD)BaseAddress) {
+                return (*it32).modBaseSize;
+            }
+        }
+    }
+    return 0;
 }
 
 BOOL IsModuleExist(DWORD dwPid, char *szModuleName)

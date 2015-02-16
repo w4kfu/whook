@@ -49,5 +49,6 @@ std::list<MODULEENTRY64> GetModuleList64(DWORD dwPid);
 std::list<MODULEENTRY32> GetModuleList(DWORD dwPid);
 BOOL IsModuleExist(DWORD dwPid, char *szModuleName);
 std::list<MODULEENTRY32> GetModuleList(char *szModuleName);
+ULONG64 GetModuleSize(DWORD dwPid, ULONG64 BaseAddress);
 
 #endif // __MODULES_H__

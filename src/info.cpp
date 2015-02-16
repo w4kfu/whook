@@ -106,11 +106,6 @@ void PrintUDPConnectionsv6(std::list<MIB_UDP6ROW_OWNER_PID> mib)
     }
 }
 
-void PrintPidProcess(char *szModuleName, DWORD dwPid)
-{
-    printf("szModuleName : %s, PID : %d (0x%X)\n", szModuleName, dwPid, dwPid);
-}
-
 void PrintModulesList(std::list<MODULEENTRY32> lModules)
 {
     std::list<MODULEENTRY32>::const_iterator it;
@@ -144,13 +139,23 @@ void PrintExportEntry(std::list<EXPORTENTRY> lExport)
     }
 }
 
-void PrintMemoryInfo(std::list<MEMORY_BASIC_INFORMATION> lMemBI)
+void PrintMemoryInfo(std::list<MEMORY_BASIC_INFORMATION32> lMemBI)
 {
-    std::list<MEMORY_BASIC_INFORMATION>::const_iterator it;
+    std::list<MEMORY_BASIC_INFORMATION32>::const_iterator it;
 
-    for (it = lMemBI.begin(); it != lMemBI.end(); ++it)
-    {
+    for (it = lMemBI.begin(); it != lMemBI.end(); ++it) {
         printf("BaseAddress : %08X\tRegionSize : %08X\tProtect : %08X\n", (*it).BaseAddress, (*it).RegionSize, (*it).Protect);
+    }
+}
+
+void PrintMemoryInfo(std::list<MEMORY_BASIC_INFORMATION64> lMemBI)
+{
+    std::list<MEMORY_BASIC_INFORMATION64>::const_iterator it;
+
+    printf("BaseAddress        RegionSize         Protect\n");
+    printf("================== ================== ==========\n");
+    for (it = lMemBI.begin(); it != lMemBI.end(); ++it) {
+        printf("0x%016llX 0x%016llX 0x%08X\n", (*it).BaseAddress, (*it).RegionSize, (*it).Protect);
     }
 }
 

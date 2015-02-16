@@ -1,6 +1,6 @@
 #include "pestuff.h"
 
-PROCESS_BASIC_INFORMATION32 GetRemotePEB32(HANDLE HProcess)
+PROCESS_BASIC_INFORMATION32 GetRemotePBI32(HANDLE HProcess)
 {
     PROCESS_BASIC_INFORMATION32 pbi;
     NTSTATUS (__stdcall *ZwQueryInformationProcess)(
@@ -24,7 +24,7 @@ PROCESS_BASIC_INFORMATION32 GetRemotePEB32(HANDLE HProcess)
     return pbi;
 }
 
-PROCESS_BASIC_INFORMATION64 GetRemotePEB64(HANDLE HProcess)
+PROCESS_BASIC_INFORMATION64 GetRemotePBI64(HANDLE HProcess)
 {
     PROCESS_BASIC_INFORMATION64 pbi;
     NTSTATUS (__stdcall *ZwQueryInformationProcess)(
@@ -48,6 +48,26 @@ PROCESS_BASIC_INFORMATION64 GetRemotePEB64(HANDLE HProcess)
     return pbi;
 }
 
+ULONG64 GetRemoteBaseAddress(HANDLE HProcess)
+{
+    PROCESS_BASIC_INFORMATION32 pbi32;
+    PROCESS_BASIC_INFORMATION64 pbi64;
+    ULONG64 dwImageBase = 0;
+
+    if ((Is64bitOS() == TRUE) && (IsWow64(HProcess) == FALSE)) {
+        pbi64 = GetRemotePBI64(HProcess);
+        if (ReadMemory(HProcess, (PVOID64)(pbi64.PebBaseAddress + 0x10), &dwImageBase, 8) == FALSE)
+            return 0;
+    }
+    else {
+        pbi32 = GetRemotePBI32(HProcess);
+        if (ReadMemory(HProcess, (LPCVOID)(pbi32.PebBaseAddress + 8), &dwImageBase, 4) == FALSE)
+            return 0;  
+    }
+    return dwImageBase;
+}
+
+
 ULONG64 GetRemoteBaseAddress(DWORD dwPid)
 {
     PROCESS_BASIC_INFORMATION32 pbi32;
@@ -58,18 +78,16 @@ ULONG64 GetRemoteBaseAddress(DWORD dwPid)
     if ((HProcess = GetHandleProcess(dwPid)) == NULL)
         return 0;
     if ((Is64bitOS() == TRUE) && (IsWow64(HProcess) == FALSE)) {
-        pbi64 = GetRemotePEB64(HProcess);
-        if (ReadMemory(HProcess, (PVOID64)(pbi64.PebBaseAddress + 0x10), &dwImageBase, 8) == FALSE) {
+        pbi64 = GetRemotePBI64(HProcess);
+        if (ReadMemory(HProcess, (PVOID64)(pbi64.PebBaseAddress + 0x10), &dwImageBase, 8) == FALSE)
             return 0;
-        }
     }
     else {
-        pbi32 = GetRemotePEB32(HProcess);
+        pbi32 = GetRemotePBI32(HProcess);
         if (pbi32.uUniqueProcessId != dwPid)
             return 0;
-        if (ReadMemory(HProcess, (LPCVOID)(pbi32.PebBaseAddress + 8), &dwImageBase, 4) == FALSE) {
-            return 0;
-        }    
+        if (ReadMemory(HProcess, (LPCVOID)(pbi32.PebBaseAddress + 8), &dwImageBase, 4) == FALSE)
+            return 0;  
     }
     return dwImageBase;
 }
@@ -158,12 +176,10 @@ std::list<EXPORTENTRY> GetExport(HMODULE hModule)
         Export.Ordinal = NameOrdinal;
         Export.FunctionRVA = FunctionRVA;
         memset(Export.FunctionName, 0, 256);
-        if (index >= pExport->NumberOfNames) {
+        if (index >= pExport->NumberOfNames)
             sprintf_s(Export.FunctionName, 256, "Ordinal_0x%08X", NameOrdinal);
-        }
-        else {
+        else
             strncpy_s(Export.FunctionName, 256, (char*)(RVA2Offset(hModule, pApiNames[index]) + (DWORD)hModule), 256 - 1);
-        }
         lExport.push_back(Export);
     }
     return lExport;

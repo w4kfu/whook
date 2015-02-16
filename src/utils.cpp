@@ -82,50 +82,43 @@ BOOL Is64BitProcess(DWORD dwPid)
     return FALSE;
 }
 
-BOOL EnablePrivilege(PCSTR PrivilegeName, BOOLEAN Acquire)
+BOOL Is64BitProcess(HANDLE HProcess)
 {
-    HANDLE tokenHandle;
-    BOOL ret;
-    ULONG tokenPrivilegesSize = FIELD_OFFSET(TOKEN_PRIVILEGES, Privileges[1]);
-    PTOKEN_PRIVILEGES tokenPrivileges = (PTOKEN_PRIVILEGES)(calloc(1, tokenPrivilegesSize));
+    if ((Is64bitOS() == TRUE) && (IsWow64(HProcess) == FALSE)) {
+        return TRUE;
+    }
+    return FALSE;
+}
 
-    if (tokenPrivileges == NULL) {
-        fprintf(stderr, "[-] EnablePrivilege - calloc failed\n");
-        return FALSE;
-    }
-    tokenHandle = NULL;
-    tokenPrivileges->PrivilegeCount = 1;
-    ret = LookupPrivilegeValueA(NULL, PrivilegeName,
-                               &tokenPrivileges->Privileges[0].Luid);
-    if (ret == FALSE) {
-        fprintf(stderr, "[-] EnablePrivilege - LookupPrivilegeValueA failed: %lu\n", GetLastError());
-        goto Exit;
-    }
-    tokenPrivileges->Privileges[0].Attributes = Acquire ? SE_PRIVILEGE_ENABLED
-                                                        : SE_PRIVILEGE_REMOVED;
-    ret = OpenProcessToken(GetCurrentProcess(),
-                           TOKEN_ADJUST_PRIVILEGES,
-                           &tokenHandle);
-    if (ret == FALSE) {
-        fprintf(stderr, "[-] EnablePrivilege - OpenProcessToken failed: %lu\n", GetLastError());
-        goto Exit;
-    }
-    ret = AdjustTokenPrivileges(tokenHandle,
-                                FALSE,
-                                tokenPrivileges,
-                                tokenPrivilegesSize,
-                                NULL,
-                                NULL);
-    if (ret == FALSE) {
-        fprintf(stderr, "[-] EnablePrivilege - AdjustTokenPrivileges: %lu\n", GetLastError());
-        goto Exit;
-    }
-Exit:
-    if (tokenHandle != NULL) {
-        CloseHandle(tokenHandle);
-    }
-    free(tokenPrivileges);
-    return ret;
+BOOL EnablePrivilege(LPCTSTR lpszPrivilege, BOOL bEnablePrivilege) 
+{
+	TOKEN_PRIVILEGES tp;
+	LUID luid;
+    HANDLE hToken;
+
+	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ALL_ACCESS, &hToken)) {
+        fprintf(stderr, "[-] EnablePrivilege - OpenProcessToken() failed: %lu\n", GetLastError());
+		return FALSE;
+	}
+	if (!LookupPrivilegeValue(NULL, lpszPrivilege, &luid)) {
+		fprintf(stderr, "[-] EnablePrivilege - LookupPrivilegeValue failed: %lu\n", GetLastError()); 
+		return FALSE;
+	}
+	tp.PrivilegeCount = 1;
+	tp.Privileges[0].Luid = luid;
+	if (bEnablePrivilege)
+		tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+	else
+		tp.Privileges[0].Attributes = 0;
+	if (!AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), (PTOKEN_PRIVILEGES) NULL, (PDWORD)NULL)) {
+		fprintf(stderr, "[-] EnablePrivilege - AdjustTokenPrivileges failed: %lu\n", GetLastError()); 
+		return FALSE; 
+	} 
+	if (GetLastError() == ERROR_NOT_ALL_ASSIGNED) {
+		fprintf(stderr, "[-] The token does not have the specified privilege\n");
+		return FALSE;
+	} 
+	return TRUE;
 }
 
 BOOL IsElevated(VOID) 
